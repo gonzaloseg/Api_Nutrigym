@@ -2,6 +2,7 @@ package com.example.NutriGym.servicios;
 
 import java.util.List;
 
+import com.example.NutriGym.dto.CarritoItemDTO;
 import com.example.NutriGym.entidades.Carrito;
 
 public interface CarritoService {
@@ -10,5 +11,7 @@ public interface CarritoService {
 
     void procesarCompra(Long usuarioId);
 
-    List<Carrito> obtenerCarritoPorUsuario(Long usuarioId);
+    List<CarritoItemDTO> obtenerCarritoPorUsuario(Long usuarioId);
+
+    void eliminarProductoDelCarrito(Long usuarioId, Long productoId);
 }

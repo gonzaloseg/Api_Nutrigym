@@ -2,9 +2,12 @@ package com.example.NutriGym.servicios;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.example.NutriGym.dto.CarritoItemDTO;
 import com.example.NutriGym.entidades.Carrito;
 import com.example.NutriGym.entidades.Productos;
 import com.example.NutriGym.entidades.Usuarios;
@@ -23,27 +26,37 @@ public class CarritoServiceImpl implements CarritoService {
     }
 
     @Override
+    @Transactional
     public Carrito agregarProductoAlCarrito(Long usuarioId, Long productoId, Integer cantidad) {
+
         Productos producto = productosRepository.findById(productoId)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        if (producto.getStock() < cantidad) {
-            throw new RuntimeException("Stock insuficiente");
-        }
-
-        // Aquí puedes buscar si ya hay un ítem con ese producto para ese usuario
         Optional<Carrito> existente = carritoRepository.findByUsuarioId(usuarioId).stream()
                 .filter(item -> item.getProducto().getId().equals(productoId))
                 .findFirst();
 
         Carrito item;
+        int cantidadActual = existente.map(Carrito::getCantidad).orElse(0);
+        int nuevaCantidad = cantidadActual + cantidad;
+
+        if (nuevaCantidad > producto.getStock()) {
+            throw new RuntimeException("No puedes agregar más unidades que las disponibles en stock");
+        }
+
+        if (nuevaCantidad < 1) {
+            // Si la cantidad llega a cero o menos, eliminamos el producto del carrito
+            existente.ifPresent(carritoRepository::delete);
+            throw new RuntimeException("Producto eliminado del carrito por cantidad <= 0");
+        }
+
         if (existente.isPresent()) {
             item = existente.get();
-            item.setCantidad(item.getCantidad() + cantidad);
+            item.setCantidad(nuevaCantidad);
         } else {
             item = new Carrito();
             Usuarios usuario = new Usuarios();
-            usuario.setId(usuarioId); // Solo seteamos el ID, evitamos hacer otra query
+            usuario.setId(usuarioId); // solo se asigna el ID, sin buscarlo
             item.setUsuario(usuario);
             item.setProducto(producto);
             item.setCantidad(cantidad);
@@ -72,8 +85,17 @@ public class CarritoServiceImpl implements CarritoService {
     }
 
     @Override
-    public List<Carrito> obtenerCarritoPorUsuario(Long usuarioId) {
-        return carritoRepository.findByUsuarioId(usuarioId);
-        }
+    public List<CarritoItemDTO> obtenerCarritoPorUsuario(Long usuarioId) {
+        List<Carrito> carrito = carritoRepository.findByUsuarioId(usuarioId);
 
+        return carrito.stream()
+                .map(c -> new CarritoItemDTO(c.getProducto(), c.getCantidad()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void eliminarProductoDelCarrito(Long usuarioId, Long productoId) {
+        Optional<Carrito> carritoOptional = carritoRepository.findByUsuarioIdAndProductoId(usuarioId, productoId);
+        carritoOptional.ifPresent(carritoRepository::delete);
+    }
 }
