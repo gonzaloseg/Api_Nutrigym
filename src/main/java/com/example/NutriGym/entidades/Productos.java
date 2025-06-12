@@ -26,15 +26,39 @@ public class Productos {
 	    
 	    @Column(name = "imagen", length = 500)
 	    private String imagen;
+	    
+	    @Column(name = "imagen2", length = 500)
+	    private String imagen2;
+	    
+	    @Column(name = "imagen3", length = 500)
+	    private String imagen3;
 
-	    public String getImagen() {
+	    
+	    
+	   
+
+		public String getImagen() {
 			return imagen;
 		}
 
 		public void setImagen(String imagen) {
 			this.imagen = imagen;
 		}
-
+		 public String getImagen2() {
+			return imagen2;
+		}
+		
+		public void setImagen2(String imagen2) {
+			this.imagen2 = imagen2;
+		}
+		
+		public String getImagen3() {
+			return imagen3;
+		}
+		
+		public void setImagen3(String imagen3) {
+		    this.imagen3 = imagen3;
+		}
 		public String getDescripcion() {
 			return descripcion;
 		}
@@ -84,10 +108,10 @@ public class Productos {
 	        this.categoria = categoria;
 	    }
 
-		
+
 
 		public Productos(Long id, String nombre, Integer stock, Double precio, String categoria, String descripcion,
-				String imagen) {
+				String imagen, String imagen2, String imagen3) {
 			super();
 			this.id = id;
 			this.nombre = nombre;
@@ -96,6 +120,8 @@ public class Productos {
 			this.categoria = categoria;
 			this.descripcion = descripcion;
 			this.imagen = imagen;
+			this.imagen2 = imagen2;
+			this.imagen3 = imagen3;
 		}
 
 		public Productos() {

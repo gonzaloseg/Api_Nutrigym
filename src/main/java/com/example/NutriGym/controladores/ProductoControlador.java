@@ -56,6 +56,9 @@ public class ProductoControlador {
             producto.setCategoria(productoDetalles.getCategoria());
             producto.setDescripcion(productoDetalles.getDescripcion());
             producto.setImagen(productoDetalles.getImagen());
+            producto.setImagen2(productoDetalles.getImagen2());
+            producto.setImagen3(productoDetalles.getImagen3());
+
 
             return ResponseEntity.ok(productoService.guardarProducto(producto));
         } else {
